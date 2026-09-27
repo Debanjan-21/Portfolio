@@ -1,21 +1,26 @@
 // ----------------------------------------------------
-// Translucent Loader Lifecycle Control Engine (2800ms)
+// Translucent Loader Lifecycle Control Engine
 // ----------------------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
+function dismissLoader() {
   const loadingScreen = document.getElementById("loading-screen");
+  if (!loadingScreen || loadingScreen.classList.contains("loader-hidden")) return;
   
-  if (loadingScreen) {
-    window.setTimeout(() => {
-      loadingScreen.classList.add("loader-hidden");
-      
-      // Completely erase the component layout after transitions finish to free DOM resources
-      window.setTimeout(() => {
-        loadingScreen.remove();
-      }, 1100);
-      
-    }, 2800);
-  }
+  loadingScreen.classList.add("loader-hidden");
+  window.setTimeout(() => {
+    loadingScreen.remove();
+  }, 1100);
+}
+
+// Display loader for a minimum of 1000ms for visual polish, then dismiss once page is fully loaded
+const loaderStartTime = Date.now();
+window.addEventListener("load", () => {
+  const elapsed = Date.now() - loaderStartTime;
+  const remaining = Math.max(0, 1000 - elapsed);
+  window.setTimeout(dismissLoader, remaining);
 });
+
+// Fallback safety timeout (max 2200ms)
+window.setTimeout(dismissLoader, 2200);
 
 // ----------------------------------------------------
 // Core Intersection Observer for Slide reveals
@@ -80,9 +85,9 @@ if (profileCard && profileWrapper) {
 
 
 // ----------------------------------------------------
-// Smooth Scroll Navigation
+// Smooth Scroll Navigation (850ms Snappy Duration)
 // ----------------------------------------------------
-function smoothScrollTo(targetY, duration, callback) {
+function smoothScrollTo(targetY, duration = 850, callback) {
   const startY = window.scrollY;
   const difference = targetY - startY;
   let startTime = null;
@@ -116,7 +121,8 @@ navLinks.forEach(link => {
     const targetEl = document.querySelector(targetId);
     if (targetEl) {
       e.preventDefault();
-      smoothScrollTo(targetEl.offsetTop, 2000);
+      const targetPos = window.scrollY + targetEl.getBoundingClientRect().top - 20;
+      smoothScrollTo(targetPos, 850);
     }
   });
 });
@@ -125,7 +131,7 @@ const homeLogos = document.querySelectorAll(".home-logo");
 homeLogos.forEach(logo => {
   logo.addEventListener("click", function(e) {
     e.preventDefault();
-    smoothScrollTo(0, 2000);
+    smoothScrollTo(0, 850);
   });
 });
 
